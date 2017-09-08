@@ -1,0 +1,56 @@
+%%%  Vzor pro použití makra pro roèníkovou práci, soubor byl revidován
+%%%  a doplnìn v záøí 2001
+%%%  (c) 2001 Vilém Vychodil, <vilem.vychodil@upol.cz>
+%%%
+%%%  Po pøeložení programem CSLaTeX (tøikrát) je potøeba použít
+%%%  program DVIPS a takto získaný PostScriptový soubor vytisknout
+%%%  na PostScriptové tiskárnì nebo pomocí programu GhostScript.
+%%%
+%%%  Rovnìž je možné použít program DVIPDFM a vytvoøit z dokumentu
+%%%  soubor ve formátu PDF vèetnì hypertextových odkazù.
+
+
+%%% Deklarace hlavièky dokumentu.
+\documentclass{article}
+
+%%% Pøipojení dodateèného stylu pro roèníkovou práci. Nepovinné argumenty
+%%% `tables' a `figures' použijte pouze v pøípadì, že váš dokument obsahuje
+%%% tabulky a obrázky a chcete vytvoøit jejich seznamy za obsahem.
+%%%
+%%% Pokud chcete vytváøet pouze dokument ve formátu PostScript, mùžete uvést
+%%% dodateèný argument `nopdf'. Tím se potlaèí chybová hlášení pøi použití
+%%% programu `dvips'.
+\usepackage{uproject}
+
+
+%%% Parametry pro vytvoøení úvodních stránek. Makrem \subtitle je možné
+%%%  vytvoøit druhý øádek v názvu projektu.
+\title{Hra 16 vojákù}
+\author{Michal kandr}
+\group{Aplikovaná informatika, II. roèník}
+\date{Èerven 2008}
+
+\docinfo{Michal Kandr}{Hra 16 vojákù}
+
+\abstract{%
+Popis projektu jehož cílem je implementace aplikace deskové hry 16 vojákù. Program je vytvoøen v jazyce Java. Dokument obsahuje programátorskou dokumentaci s popisem struktury aplikace, jednotlivých tøíd a jejich hlavních metod.}
+
+\begin{document}
+
+\maketitle
+
+
+
+\newpage
+
+
+
+
+
+
+
+
+
+
+
+\end{document}

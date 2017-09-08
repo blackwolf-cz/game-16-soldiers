@@ -1,0 +1,244 @@
+%%%  Vzor pro pou¾ití makra pro roèníkovou práci, soubor byl revidován
+%%%  a doplnìn v záøí 2001
+%%%  (c) 2001 Vilém Vychodil, <vilem.vychodil@upol.cz>
+%%%
+%%%  Po pøelo¾ení programem CSLaTeX (tøikrát) je potøeba pou¾ít
+%%%  program DVIPS a takto získaný PostScriptový soubor vytisknout
+%%%  na PostScriptové tiskárnì nebo pomocí programu GhostScript.
+%%%
+%%%  Rovnì¾ je mo¾né pou¾ít program DVIPDFM a vytvoøit z dokumentu
+%%%  soubor ve formátu PDF vèetnì hypertextových odkazù.
+
+
+%%% Deklarace hlavièky dokumentu.
+\documentclass{article}
+
+%%% Pøipojení dodateèného stylu pro roèníkovou práci. Nepovinné argumenty
+%%% `tables' a `figures' pou¾ijte pouze v pøípadì, ¾e vá¹ dokument obsahuje
+%%% tabulky a obrázky a chcete vytvoøit jejich seznamy za obsahem.
+%%%
+%%% Pokud chcete vytváøet pouze dokument ve formátu PostScript, mù¾ete uvést
+%%% dodateèný argument `nopdf'. Tím se potlaèí chybová hlá¹ení pøi pou¾ití
+%%% programu `dvips'.
+\usepackage[tables]{uproject}
+
+
+%%% Parametry pro vytvoøení úvodních stránek. Makrem \subtitle je mo¾né
+%%%  vytvoøit druhý øádek v názvu projektu.
+\title{V\v e\v zová koncovka}
+\author{Roman Loník}
+\group{Informatika, III. roèník}
+\date{Èerven 2007}
+
+\docinfo{Roman Lonik}{Vezova koncovka}
+
+\abstract{%
+V této dokumentaci je popsán projekt, jen¾ si kladl za cíl vytvoøit provozuschopnou aplikaci, která bude umo¾òovat hrát ¹achovou koncovku. V¹e je zprogramováno v jazyce C\# za pomoci Microsoft Visual Studia 2005. Nedílnou souèástí je i .NET Framework 2.0. Grafika byla vytvoøena pomocí programu Blender 3D a Photoshop CS3.  }
+
+\begin{document}
+
+\maketitle
+
+%%% Popis a analýza.
+\newpage
+\section{Popis a analýza}
+\subsection{Pravidla hry a poèáteèní situace}
+©achová koncovka je pouze zú¾ením hry ©achy. Lze si ji pøedstavit jako rozehranou ¹achovou partii v pozdní fázi hry. Vì¾ová koncovka tedy obsahuje figury králù obou hráèù (èerný a bíly), maximálnì dvì vì¾e od ka¾dé barvy, maximálnì 8 pì¹ákù od ka¾dé barvy a za ka¾dého vyhozeného pì¹áka je mo¾né mít nasazenou figuru dámy. Tedy celkový souèet pì¹ákù a dam jedné barvy nesmí pøekroèit èíslo 8. \medskip \\
+
+\subsection{Kompletní znìní zadání programu}
+Studentùm je ponechána volnost co se týèe vytvoøení programu; program v¹ak musí být bìhem obhajoby spustitelný na poèítaèích dostupných na katedøe a student musí dát k dispozici kompletní zdrojové kódy programu. Pokud studenti chtìjí pou¾ít pøi programování nìjaké nestandardní knihovny èi komponenty, smìjí tak uèinit pouze se souhlasem zadavatele. \medskip \\
+
+Po¾adavky na hotový program tak jak byly uvedeny na~\cite{vilem}:
+\begin{enumerate}
+\item[-]korektní implementace pravidel hry (nemo¾nost provést tah odporující pravidlùm, správné ukonèení hry, a podobnì)
+\item[-]algoritmy pro herní strategii, nastavitelná obtí¾nost hry
+\item[-]mo¾nost hry dvou lidí, èlovìka proti \clqq poèítaèi\crqq, a \clqq poèítaèe\crqq\ proti  \clqq poèítaèi\crqq
+\item[-]mo¾nost nastavit a kdykoliv zmìnit obtí¾nost
+\item[-]mo¾nost kdykoliv zamìnit poèítaèového a lidského hráèe
+\item[-]nápovìda \clqq nejlep¹ího tahu\crqq
+\item[-]ukládání a naèítání rozehraných partií
+\item[-]undo/redo tahù do libovolné úrovnì
+\item[-]prohlí¾ení historie tahù (pøehledné zobrazení provedených tahù)
+\item[-]zpìtné pøehrání partie po jejím dokonèení (replay)
+\item[-]robustnost (program musí reagovat správnì na nesprávné u¾ivatelské vstupy)
+\item[-]vestavìná nápovìda
+\item[-]grafické u¾ivatelské rozhraní (GUI) se standardním ovládáním (v daném systému nebo toolkitu)
+\end{enumerate}
+
+\subsection{Základní analýza projektu}
+
+Pøi programování projektu jako celku byl kladen nejvìt¹í dùraz na dodr¾ování zásad objektovì orientovaného programování. Ka¾dý dùle¾itý prvek z logického hlediska je programován jako objekt.
+  
+\subsubsection{Datová interpretace ¹achovnice}
+Výbìr reprezentace ¹achovnice patøí k základním problémùm ka¾dého ¹achového programu a vhodnì zvolená reprezentace ovlivní i budoucí programování. Jako první se nabízí reprezentace 8x8 a» u¾ pomocí jednorozmìrného nebo dvourozmìrného pole. Výhodou je intuitivní obsluha, nevýhodou nutnost testovat ètyøi podmínky, zda nejsme mimo ¹achovnici. Jako dal¹í mo¾nost interpretace jsem zvolil interpretaci maticí 16x8. Celkovì v¹ak do¹lo ke zpomalení výpoètù, a proto¾e si aplikace neklade za cíl konkurovat vyspìlej¹ím ¹achovým programùm co do rychlosti a kvality, zvolil jsem nakonec interpretaci 8x8 pomoci dvou rozmìrného pole. 
+
+\subsubsection{Datová interpretace figur}
+Dal¹ím neménì dùle¾itým problémem je volba reprezentace figur. Figuru si v této aplikaci mù¾eme pøedstavit jako objekt, který je popsán nìkolika vlastnostmi. Nejdùle¾itìjsí jsou \emph{Typ, Pozice a Barva}. Objekty figur kromì vlastností nabízejí i nìkolik metod.
+
+\subsubsection{©achové my¹lení poèítaèového hráèe}
+Pro takzvanou \clqq Umìlou inteligenci \crqq aplikace pou¾ívá velmi známý alfa-beta algoritmus, který vycházi z algoritmu MiniMax. Pro zefektivnìní práce algoritmu je¹tì dochází pøi generování tahù jejich setøídìní podle zadaného klíèe. Nedílnou souèástí výpoètu nejlep¹ího tahu je i ohodnocovací funkce, která bude popsána dále. Samotný výpoèet nejlep¹ího tahu je nejdùle¾itìj¹ím prvkem aplikace. Metoda, která jej zaji¹»uje, je bìhem hledání jednoho tahu volána nìkolikset tisickrát a spotøebuje nejvíce procesorového èasu. Aby byla aplikace reakce schopná i bìhem výpoètu, je tah poèítán v novém paralelním vláknì.
+
+
+
+%%% U¾ivatelská èást.
+\newpage
+\section{U¾ivatelská èást}
+Program byl vytvoøen pro operaèní system Microsoft Windows (testován ve verzi Windows XP). V této èásti dokumentace bude popsán vzhled a ovládání aplikace z pohledu bì¾ného u¾ivatele.
+\medskip \\
+
+\subsection{Podoba u¾ivatelského rozhraní}
+Vzhled u¾ivatelského prostøedí se sna¾í co nejvíce dr¾et konvencí pro \clqq Windows Forms \crqq aplikace. 
+  
+\subsubsection{Herní menu}
+Ihned po spu¹tìní aplikace se objeví jednoduché dialogové okno se základním menu (Nová hra, Naèíst hru, Nápovìda a Konec), které nás bude provázet i po skonèení hry, a umo¾ní nám tak napøíklad spustit hru novou.
+ 
+\subsubsection{Nová hra}
+Volbou \emph{Nová hra} vyvoláme pøíslu¹né dialogové okno, které slou¾í k nastavení v¹ech potøebných polo¾ek pro novou hru. Základní volbou je druh hráèe (èlovìk, poèítaè). Pokud zvolíme lidského hráèe, mù¾eme si nastavit barvu (bílá, èerná) a styl ovládání (Drag And Drop, Point And Click). U poèítaèového hráèe mù¾eme zvolit obtí¾nost. Èím vy¹¹í obtí¾nost, tím kvalitnìji hraje, ale musíme poèítat s del¹í dobou výpoètu. Poslední mo¾ností je rozestavení figur. Pokud zvolíme mo¾nost ruèního rozestavení, sami urèíme, kde bude která figura. V opaèném pøípadì nám aplikace nabídne jednu z pøepøipravených partií. Novou hru spustime stisknutím tlaèítka \emph{HRAJ!}.   
+
+\subsubsection{Hlavní okno}
+Po spu¹tení nové hry, èi naètení ulo¾ené partie vstoupíme do hlavního a nejdùle¾itìj¹ího okna aplikace. Toto okno mù¾eme pomyslnì rozdìlit na ¹est dílèích souèástí. První je standardní menu, obsahující polo¾ky \emph{Soubor, Nastavení} a \emph{Nápovìda}. Po kliknutí se nám ka¾dá z polo¾ek rozbalí v dal¹í nabídky. Pod tímto menu je zhruba ve støední èásti okna soubor ikon, které zaji¹»ují rychlý pøístup ke v¹em dùle¾itým funkcím. Po øadì jsou to jmenovitì \emph{Nová hra, Naèíst ulo¾enou hru, Ulo¾it aktuální hru, Nápovìda, Zapnutí/vypnutí re¾imu pøehrávání hry, Zapnutí/vypnutí zobrazování popisu ¹achovnice, Nastavení hráèù, Nápovìda nejlep¹ího tahu, Zapnutí/vypnutí zobrazování v¹ech mo¾ných tahù z dané pozice} a \emph{Nápovìda}. Tyto ikony jsou aktivní jen za splnìní urèitých podmínek. V levé èásti je panel zobrazující stav hráèù - odehraný èas a vyhozené figury. Aktuální hráè, ma èasový údaj podbarven èervenì. Také se zde zobrazuje stav výpoètu poèítaèového hráèe, popøípadì stav hledání nejlepìího tahu pro hráèe lidského. V pravé èásti je panel zobrazující seznam provedených tahù, tlaèítka pro provedení tahu zpìt, provedení tahu vpøed a spu¹tìní pozastavené hry. Pøiaktivním re¾imu pøehrávání hry zde také nalezneme ovladácí prvky právì tohoto re¾imu. Mezi tìmito panely je pod souborem ikon  panel informující o stavu hry. 
+\medskip \\
+
+A koneènì støední nejvìt¹í èást je samotná ¹achovnice. 
+
+\subsubsection{Okno nastavení hráèe}
+V tomto dialogovém oknì mù¾eme bìhem hry zmìnit nìkteré vlastnosti hráèe. Mù¾eme zmìnit typ hráèe z poèítaèového na lidského a naopak. V pøípadì poèítaèového protivníka mù¾eme nastavit jeho úroveò. Po dobu zobrazení tohoto dialogového okna je hra pozastavena. 
+
+\subsubsection{Okno konec hry}
+Po skonèení hry, a» u¾ skonèí jakýmkoliv výsledkem, se zobrazí malé dialogové okno, které nás informuje o výsledku partie. Ta mù¾e skonèit vítìzstvím jednoho z hráèù (dá soupeøi ¹ach mat), patem (hráè není v matu, ale nemá mo¾nost pohybu - je napøíklad zablokován vlastními figurami) nebo remízou (dvacet tahù bez skoèení figury). Dále obsahuje tøi tlaèítka pro tvorbu nové hry, pøehrátí ukonèené partie a konec. V této chvíli ji¾ nejde zmìnit výsledek partie, nelze provést napøíklad nìkolik tahù zpìt a poté hru spustit.
+
+\subsection{Hlavní funkce programu}
+
+V této èásti dokumentace jsou popsány hlavní funkce programu související s vlastní hrou.
+
+\subsubsection{Zahájení hry, naètení a ulo¾ení}
+Hru mù¾ete zaèít buï volbou \emph{Nová hra} a nebo naètením hry døíve ulo¾ené volbou "Otevøít". V prvním pøípadì je zahájena hra nová podle nastavených kritérií, ve druhém pak rozehraná partie. Soubory ulo¾ených partií mají standardnì pøíponu \emph{.chs}. Rozehraná partie bude pøesnì ve stavu pøi jejím ulo¾ení. Nebude v¹ak zapnuta volba \emph{Zobrazení popisu ¹achovnice} a \emph{zobrazení mo¾ných tahu z dané pozice}. Hru nelze ulo¾it pokud je aktivní \emph{re¾im pøehrávání hry}.
+
+\subsubsection{Nápovìda nejlep¹ího tahu}
+Tato volba je aktivní pouze pokud je na tahu lidský hráè. Kliknutím na ikonu lupy v horní èásti obrazovky ji aktivujeme. Poèítaè vyhledá nejlep¹í tah, tak jako by byl sám na tahu. Nejlep¹í nalezený tah se pak zobrazí zbarvením figury do ¹eda s èervenou záøí a vykreslením ¹edé figury na cílové políèko. V tuto chvíli staèí pro provedení tahu kliknout na cílové políèko, popøípadì pøetáhnout figuru (zále¾í na zvoleném stylu ovládání). Chceme provést jiný tah, udìláme to, jako bychom mìli vybranou figuru. To znamená klikneme my¹í na políèko s jinou figurou.
+
+\subsubsection{Re¾im pøehrátí hry}
+Tento re¾im mù¾eme aktivovat kdykoliv v prùbìhu hry. Jeho aktivací v¹ak pøeru¹íme probíhající výpoèet. V pravé èasti s výpisem tahù se zobrazí sada ovládacích prvkù. Jmenovitì to jsou \emph{Tah zpìt, stop, spus» (pozastav), tah vpøed} a  \emph{rychlost pøehrávání}. Bìhem re¾imu pøehrávání není mo¾né hru ukládat, zakládat novou hru nebo otevøít ulo¾enou partii. Po ukonèení re¾imu reply je tøeba spustit pozastavenou hru.
+
+%%% Programátorská èást.
+\newpage
+\section{Programátorská èást}
+V této tøetí èásti bude aplikace popsána z pohledu programátora. Budou zde popsány jednotlivé objekty (tøídy) a metody. 
+Aplikace by se dala pomyslnì rozdìlit na dva dílèí celky:\\
+
+\newcounter{celky}
+ \begin{list}{(\sc \arabic{celky})}{\usecounter{celky}}
+   \item Vnitøní logika \\ 
+   \item Grafické u¾ivatelské rozhraní \\ 
+ \end{list}
+ Vniøní logika je soubor tøíd, které øídí celou aplikaci, zaji¹»ují správnou posloupnoust akcí a reagují na akce u¾ivatele. Na tyto tøídy je pak napojena grafická èást, která výsledky vnitøní logiky interpretuje u¾ivateli.
+ 
+\subsection{Tøída SACHOVNICE}
+
+Tato tøída je datovou interpretací ¹achovnice a obsahuje metody pro ve¹kerou práci s ¹achovnicí. 
+\subsubsection{Datové prvky}
+Pro reprezentaci ¹achovnice bylo zvoleno dvourozmìrné pole 8x8 objektù POLICKO. Výhodou je intuitivní práce s jednotlivými políèky a odpadá práce pøepoètu. Tøída obsahuje dvì dùle¾ité struktury. První je struktura \emph{souradnice}, která nám je¹tì více usnadní práci. Druhou strukturou je \emph{tah}, který byl pùvodnì umístìn ve tøídì \emph{GENERATOR}. Ta je v¹ak statická a proto byla struktura \emph{tah} umístìna do tøídy \emph{SACHOVNICE}.
+
+\subsubsection{Metody}
+Metody jsou rodìleny do tøí skupin:\\
+\newcounter{metody1}
+ \begin{list}{(\sc \arabic{metody1})}{\usecounter{metody1}}
+   \item Statické metody:\\
+   Soubor metod, které vracejí  políèka z ¹achovnice. Napøíklad políèka z celého øádku, sloupce, diagonaly, v¹echna sousední políèka apod. Dále pøetí¾ená metoda, která urèí, zda dané políèko nále¾í ¹achovnici (zda není mimo ¹achovnici) a koneènì pøetí¾ená metoda, která pøevede zápis souøadnice (A5, C3 apod.).
+   \item Metody mìnící obsah ¹achovnice: \\
+Velice dùle¾ité metody na provádìní tahu a tahu zpìt a metody na rozestavìní figur.
+\item  Pomocné metody: \\ 
+Metody pro klonování objektu ¹achovnice, nalezení políèka s králem, vrácení konkrétního políèka a metoda, která zjistí, zda je v okolí políèka král.
+ \end{list}
+
+
+\subsection{Tøída POLICKO}
+
+Objekt typu \emph{POLICKO} v sobì uchovává v¹echny dùle¾ité informace o jednom konkrétním políèku. 
+\subsubsection{Datové prvky}
+Mezi datové èleny patøí informace o figuøe, která je na políèku (popøípadì null, je-li políèko prázdné), dále informace, které ¹achovnici políèko nále¾í, hodnota políèka, které se vyu¾íva v ohodnocovaví funkci, a koneènì vlastní pozice políèka na souøadnici.
+
+\subsubsection{Metody}
+Tato tøída má jen ètyøi metody pokud nepoèítáme jejich pøetí¾ené varianty. Jmenovitì to je metoda \emph{Klonuj()}, která naklonuje daný objekt políèka, metoda \emph{VlozFiguru}, metoda \emph{OdstranFiguru} a metoda \emph{PriradHodnotu}, která se volá v konstruktoru tøídy a políèku podle pozice pøiøadí bodové ohodnocení.
+
+\subsection{Tøída FIGURA}
+Tato tøída obsahuje v¹echny informace o figuøe a má jen minimum metod. 
+
+\subsubsection{Datové èleny}
+Tøída \emph{FIGURA} definuje dva výètové typy. První je  \emph{enumTyp}, pomocí kterého øíkáme, jakého je figura typu ( Pesak, Kun, Kral, Strelec, Vez, Dama a~Neurceno). Druhý je \emph{enumVarianta} s hodnotami \emph{NORM, AKT, CB}. Oznaèuje zda se jedná o obyèejnou figuru, aktivní figuru, nebo èernobílou figuru. Více k variantám figur u popisu u¾ivatelského grafického prostøedí.
+
+\subsubsection{Metody}
+
+Kromì pøetí¾eného kontruktoru obsahuje metodu \emph{Klonuj()}, její¾ úèel je stejný jako u pøede¹lých tøíd. Druhou poslední metodou je metoda \emph{PodobnaFigura(FIGURA druhaFigura, params string[] dalsiArgumenty)}. Je to obdoba metody \emph{Equals(FIGURA jinaFigura)}, ov¹em zde nám staèí, pokud se figura shoduje v jedné nebo více datových polo¾kách (Vlastník, Typ, Pozice).
+
+\subsection{Tøída GENERATOR}
+Tato tøída je tøídou statickou. Pro generování tahù toti¾ není potøeba vytváøet speciální objekt. Je to stejný pøípad kdy chcete spoèítat napøíklad absolutní hodnotu èísla pomocí metody \emph{Abs(int èíslo)}. Nevytváøíme nový objekt typu Math, ale zavoláme statickou metodu této tøídy \emph{Math.Abs(nejakeCislo)}. Neobsahuje ¾ádné datové èleny, pouze statické metody. 
+
+\subsubsection{Metody}
+Jak bylo øeèeno vý¹e, jsou v¹echny metody statické. Mù¾eme je opìt rozdìlit do nìkolika skupin. Konkrétnì se jedná o tøi následující: \\
+
+\newcounter{metody2}
+ \begin{list}{(\sc \arabic{metody2})}{\usecounter{metody2}}
+   \item Metody pro generování tahu jednotlivých figur:\\
+   Pøedpis v¹ech tìchto figur je\\ \emph{private static List<SACHOVNICE.Tah> NazevMetody(SACHOVNICE.souradnice souradnice, STAV stav)}, kde návratovým typem je seznam v¹ech tahù z dané pozice. První argument je struktura \emph{SACHOVNICE.souradnice}, udávající z jaké pozice chceme generovat tahy. Druhý argument je typu \emph{STAV}, o kterém se pí¹e ní¾e. Takto máme metodu pro ka¾dý typ figury.
+  \item Pomocné metody:\\
+Zde je zaøazena privátní metoda \emph{TahPomocna}, která pouze zpøehledòuje kód a zachovává jej èitelnìj¹í, a dvì veøejné metody. \emph{JeLegalniTah}, která jako argumenty pøijímá konkrétní tah a seznam v¹ech mo¾ných tahù v dané situaci. Vrací hodnotu typu bool, pokud je tah (první argument) obsa¾en v seznamu v¹ech tahù (druhý argument). \emph{ObsahujeFiguru} takté¾ vrací bool, a pøijímá tøi argumenty: hledanou figuru, seznam tahù a øetìzec, který oznaèuje, zda figuru hledáme ve zdrojových nebo cílových figurách.
+ \item Hlavní metody: \\
+ Tøi metody a jejich pøetí¾ené varianty. \emph{TahFigury} privátní metoda, která generuje v¹echny mo¾né tahy z dané pozice. \emph{GenerujOsetrenyTah} generuje v¹echny tahy z dané pozice a navíc kontroluje, zda provedením tohoto tahu nevystavíme krále ¹achu. \emph{GenerujVsechnyTahy} jak u¾ název vypovídá generuje v¹echny legální tahy daného hráèe (zadán jako argument).
+ \end{list}
+ 
+\subsection{Tøída ALGORITMUS}
+Tato tøída je mozkem hry poèítaèového hráèe. Je rovnì¾ statická, ze stejného dùvodu jako tøída pøedchozí. Obsahuje ètyøi hlavní metody a jejich pøetí¾ené varianty. První z nich je ohodnocovací metoda \emph{OhodnotPozici}, která na vstupu obdr¾í objekt typu \emph{STAV} a vrátí bodové ohodnocení pøíslu¹né situace. Zohledòuje materiálovou hodnotu figur a jejich postavení na ¹achovnici.
+Metoda \emph{OdstranSach} odstraní ze v¹ech mo¾ných tahù tahy vedoucí k ¹achu. Tuto metodu vyu¾ívá generátor. \emph{AlfaBeta} je metoda propoètu nejlep¹ího tahu podlé známeho algoritmu alfa-beta a koneènì metoda \emph{NejlepsiTah}. Tato metoda vrátí konkrétní nejlep¹í tah. U ní je velice zajímavý poslední argument typu \emph{BackgroundWorker}. \emph{BackgroundWorker} je tøída, která umo¾òuje jednoduchým zpùsobem implementovat paralerni provádìní výpoètu. Zde pøedáváme objekt této tøídy z dùvodu zpìtné vazby (abychom mìli mo¾nost zjistit, ¾e byl výpoèet pøedèasnì ukonèen apod.). 
+
+\subsection{Tøída STAV}
+Tøída \emph{STAV} pøedstavuje vazbu mezi v¹emi objekty a uchovává informace o stavu hry (kdo je na tahu, kdo bude na tahu pøí¹tì, aktuální stav ¹achovnice apod.) Chceme-li mít mo¾nost pøistupovat k rùzným datùm týkající se aktuální hry, vìt¹inou pøedáváme metodám právì objekt tøídy \emph{STAV}.
+\subsubsection{Datové èleny}
+Do datových èlenù je zaøazena veøejná struktura \emph{PrubehVypoctu}, která nese informaci o prùbìhu právì vykonávaného výpoètu (zpìtná vazba pro GUI), dále výètový typ, který shroma¾ïuje mo¾né varianty ukonèení hry. Z dal¹ích èlenù to je aktuální hráè, aktuální protihráè, aktuální ¹achovnice, undo a redo zásobník, informace o poètu tahù, kdy nebyla sebrána figura, a cesta k souboru, kam se hra ukládá. V¹echny tyto datové èleny jsou pøedstavovány vlastnostmi (Properties) a tím je zabezpeèeno zapouzdøení z pohledu OOP.
+
+\subsubsection{Metody}
+V¹echny metody jsou veøejné, proto¾e tato tøída tvoøí most mezi tøídami ostatními. První skupina metod pracuje s hráèi. \emph{ZmenHrace} prohodí aktuálního hráèe s protihráèem, \emph{VratBileho} resp. \emph{VratCerneho} vrátí pøíslu¹ného hráèe. Dal¹í metoda je \emph{Sach}, která zjistí zda je hráè, kterého pøedáme argumentem v ¹achu. \emph{MatNeboPat} urèuje, jak skonèila daná hra. Dále jsou zde metody pro provedení tahu zpìt èi vpøed, které vyu¾ívají podobné metody z tøídy \emph{SACHOVNICE}, a navíc pracují s undo a redo zásobníky. Poslední dvì metody provádìjí naèítání a ukládání hry.
+
+\subsection{GUIhlavniOkno}
+Velice rozsáhlá tøída typu \emph{Windows Forms}. Obsahuje velké mno¾ství datových èlenù a metod nezbytných pro správnou interpretaci dat u¾ivateli, zaji¹»uje posloupnoust zobrazení jiných grafických prvkù a dialogù. Z hlediska u¾ivatele je toto nejdùle¾itìj¹í tøída.\\
+Popisování v¹ech metod by bylo velice zdlouhavé a proto zde budou popsány spí¹e nìkteré pou¾ité postupy a posloupnosti akcí.
+
+\subsubsection{Prùbìh hry lidského hráèe}
+Aktivnì zaèíná  tah lidského hráèe kliknutím my¹i do formuláøe. Nyní je dùle¾ité zda má zvolen styl ovládání Drag and Drop(DaD) nebo Point and Click(PaC). Podle toho se zavolá pøíslu¹ná metoda, která kliknutí obslou¾í. Ta zjistí, zda bylo kliknuto do ¹achovnice a pokud ano, tak pøepoèítá souøadnice my¹i na souøadnice ¹achovnice. Dále zjistí zda je na daném políèku figura hráèe který je na tahu. Pokud ano, figura se stane aktivní. Pøi stylu  PaC se èeká do do dal¹ího kliknutí my¹i, pøi DaD na uvolnìní stisknutého tlaèítka. Podle toho je pøepoèítána cílová souøadnice. Takto získaný tah je poslán tøídì \emph{GENERATOR}, která vygeneruje v¹echny legální tahy pøíslu¹ného hráèe a vyhodnotí zda je tah platný. Pokud neuspìje, celá situace se opakuje. Pøi úspìchu je tah proveden, a hra pøedána dal¹ímu hráèi.
+
+\subsubsection{Prùbìh hry poèítaèového hráèe}
+Je-li na tahu poèítaèový hráè, je vypnuta mo¾nost kliknutí do ¹achovnice, resp. nebude to mít ¾ádný uèínek. Výpoèet poèítaèového hráèe je provádìn v separátním vláknì a proto je okno stále pøipraveno na jakoukoliv akci u¾ivatele. \\
+Z objektu tøídy \emph{STAV} se získají informace o aktuálním hráèi, zvlá¹tì pak jeho úroveò, která ovlivòuje hloubku propoètu. Výsledkem metody \emph{NejTah} ze statické tøídy \emph{ALGORITMUS} je nejlep¹í legální tah. Ten se pøedá objektu tøídy \emph{SACHOVNICE}, která tento tah provede, tzn. pohne figurami na ¹achovnici. Hra je pak pøedána dal¹ímu hráèi. 
+\\
+Tah je po provedení ulo¾en do undo zásobníku, aby jej bylo mo¾né podle potøeby zahrát zpìt, a zobrazen do výpisu tahù. 
+
+\subsection{Ostatní okna grafického prostøedí}
+Grafické prostøedí samozøejmì nesestává pouze z hlavního okna, ale z celé sady oken a dialogových oken. Z tìch dùle¾itìj¹ích to je okno nastavení hráèe a okno nastavení nové hry. Ta v¹ak provádìjí jen to, ¾e zpracují zadané informace a pøedají svému nadøízenemu, kterým je objekt typu \emph{GUIhlavniOkno}. Do skupiny tìchto oken patøí \emph{GUInovaHra, GUIherniMenu, GUIkonec} a \emph{GUInastaveni}. Ostatní okna jsou klasická dialogová okna pro naètení a ulo¾ení hry. 
+
+%tvorba grafiky
+\section{Tvorba grafiky}
+V této èasti zbì¾nì popí¹i, jak jsem tvoøil grafiku pro tuto aplikaci.
+
+\subsection{Tvorba ¹achových figur}
+V prvni grafické verzi aplikace byla pou¾ita sada figur sta¾ených z internetu. Estetický dojem byl sice pramalý, ale své úèely to zatím splnilo dostateènì. Proto¾e jsem chtìl, aby byla celá aplikace mým dílem, rozhodl jsem se, ¾e si vytvoøím vlastní sadu figur. Figury byly modelovány jako 3D modely v programu Blender 3D. V¹e bylo poté otexturováno, nasviceno a pøipraveno k renderování. Výsledkem byly velice realistické figury. Ty byly jedna podruhé postupnì pøeneseny do programu Adobe Photoshop CS3, kde byly oøezány, zmen¹eny a zbaveny nadbyteèných detailù. Nìkteré modely mìly navíc estetické vady, které bylo nutné vyretu¹ovat. Postupnì jsem vytvoøil tøi sady figur. Figury v normálním re¾imu (pro bílého a èerného hráèe), aktivované figury (èervenì ozáøené) a èernobílé figury. \\
+Ostatní grafika jako tlaèítka, panely apod. byly tvoøeny výhradnì ve Photoshopu.
+
+%%% Vytvoøení seznamu literatury.
+\newpage
+\begin{thebibliography}{99}
+ 
+\bibitem{vilem} Informace o projektovém semináøi na stránkách dr. Vychodila\\
+\emph{\url{http://vychodil.inf.upol.cz/courses/cs2pr/}}.
+ 
+\bibitem{press}Robinson, Simon.
+\emph{C\# Programujeme profesionálnì}
+Computer Press, Brno, 2003
+ 
+\bibitem{zive}Pu¹, Petr. 
+\emph{Poznáváme C\# a Microsoft .NET}
+ 
+\bibitem{web}
+\emph{\url{http://www.c-sharpcorner.com/}}.\\ \emph{\url{http://www.codeproject.com/}}.
+\end{thebibliography}
+\end{document}
+

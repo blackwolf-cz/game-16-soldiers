@@ -1,0 +1,45 @@
+\select@language {czech}
+\contentsline {section}{\numberline {1.}Po\v {z}adavky na projekt}{1}
+\contentsline {section}{\numberline {2.}Architektura aplikace}{1}
+\contentsline {section}{\numberline {3.}J\'adro aplikace}{2}
+\contentsline {subsection}{\numberline {3.1.}T\v {r}\'ida Manager}{2}
+\contentsline {subsubsection}{\numberline {3.1.1.}Metoda Run}{2}
+\contentsline {subsubsection}{\numberline {3.1.2.}Metoda Replay}{2}
+\contentsline {subsection}{\numberline {3.2.}T\v {r}\'ida PlayingArea}{2}
+\contentsline {subsubsection}{\numberline {3.2.1.}Reprezentace hrac\'i desky}{2}
+\contentsline {subsubsection}{\numberline {3.2.2.}Reprezentace tahu}{2}
+\contentsline {subsubsection}{\numberline {3.2.3.}Reprezentace historie}{3}
+\contentsline {subsubsection}{\numberline {3.2.4.}Metoda Move}{3}
+\contentsline {subsubsection}{\numberline {3.2.5.}Metoda ReverseMove}{3}
+\contentsline {subsubsection}{\numberline {3.2.6.}Metody forward a backward}{3}
+\contentsline {subsubsection}{\numberline {3.2.7.}Metoda clearNextMoves}{3}
+\contentsline {subsection}{\numberline {3.3.}T\v {r}\'ida Arbiter}{3}
+\contentsline {subsubsection}{\numberline {3.3.1.}Metoda getValidMoves}{3}
+\contentsline {subsubsection}{\numberline {3.3.2.}Metoda getJumps}{3}
+\contentsline {subsubsection}{\numberline {3.3.3.}Metoda getAllValidMoves}{4}
+\contentsline {subsubsection}{\numberline {3.3.4.}Metoda isGameOver}{4}
+\contentsline {subsubsection}{\numberline {3.3.5.}Metoda getState}{4}
+\contentsline {subsection}{\numberline {3.4.}Hr\'a\v {c}i – interface Player}{4}
+\contentsline {subsection}{\numberline {3.5.}T\v {r}\'ida HumanPlayer}{4}
+\contentsline {subsubsection}{\numberline {3.5.1.}Metoda getMove}{4}
+\contentsline {subsection}{\numberline {3.6.}T\v {r}\'ida ComputerPlayer}{4}
+\contentsline {subsubsection}{\numberline {3.6.1.}Metoda getMove}{4}
+\contentsline {subsection}{\numberline {3.7.}T\v {r}\'ida MiniMax}{4}
+\contentsline {subsubsection}{\numberline {3.7.1.}Metoda getRate}{4}
+\contentsline {subsection}{\numberline {3.8.}T\v {r}\'ida Rate}{4}
+\contentsline {subsubsection}{\numberline {3.8.1.}Metoda getRate}{5}
+\contentsline {subsection}{\numberline {3.9.}T\v {r}\'ida Export}{5}
+\contentsline {subsubsection}{\numberline {3.9.1.}Metoda Save}{5}
+\contentsline {subsubsection}{\numberline {3.9.2.}Metoda Load}{5}
+\contentsline {section}{\numberline {4.}U\v {z}ivatelsk\'e rozhran\'i}{5}
+\contentsline {subsection}{\numberline {4.1.}T\v {r}\'ida UIAdapter}{5}
+\contentsline {subsection}{\numberline {4.2.}T\v {r}\'ida Gui}{5}
+\contentsline {subsubsection}{\numberline {4.2.1.}Metoda wantMove}{6}
+\contentsline {subsubsection}{\numberline {4.2.2.}Metoda dontWantMove}{6}
+\contentsline {subsubsection}{\numberline {4.2.3.}Metoda getMove}{6}
+\contentsline {subsubsection}{\numberline {4.2.4.}Metoda endOfGame}{6}
+\contentsline {subsubsection}{\numberline {4.2.5.}Metoda paintArea}{6}
+\contentsline {subsubsection}{\numberline {4.2.6.}Metoda paintMoveHistory}{6}
+\contentsline {subsubsection}{\numberline {4.2.7.}Metoda areaClick}{6}
+\contentsline {subsection}{\numberline {4.3.}T\v {r}\'ida GraphicArea}{6}
+\contentsline {subsection}{\numberline {4.4.}T\v {r}\'ida Piece}{7}

@@ -1,0 +1,266 @@
+
+\documentclass{article}
+
+
+\usepackage{uproject}
+
+
+
+\title{Hra 16 voj\'ak\accent23u}
+\author{Michal Kandr}
+\group{Aplikovan\'a informatika, II. ro\v{c}n\'ik}
+\date{\v{c}erven 2008}
+
+\docinfo{Michal Kandr}{Hra 16 voj\'ak\accent23u}
+
+\abstract{%
+Popis projektu jeho\v{z} c\'ilem je implementace aplikace deskov\'e hry 16 voj\'ak\accent23u. Program je vytvo\v{r}en v jazyce Java. Dokument obsahuje program\'atorskou dokumentaci s popisem struktury aplikace, jednotliv\'ych t\v{r}\'id a jejich hlavn\'ich metod.}
+
+\begin{document}
+
+ \maketitle
+
+
+\newpage
+
+
+
+\section{Po\v{z}adavky na projekt}
+\begin{enumerate}
+	\item[-]korektn\'i implementace pravidel hry (nemo\v{z}nost prov\'est tah odporuj\'ic\'i pravidl\accent23um, spr\'avn\'e ukon\v{c}en\'i hry, a podobn\v{e})
+	\item[-]algoritmy pro hern\'i strategii, nastaviteln\'a obt\'i\v{z}nost hry v adekv\'atn\'im rozsahu
+	\item[-]mo\v{z}nost hry dvou lid\'i, \v{c}lov\v{e}ka proti „po\v{c}\'ita\v{c}i“, a „po\v{c}\'ita\v{c}e“ proti „po\v{c}\'ita\v{c}i“
+	\item[-]mo\v{z}nost nastavit a kdykoliv zm\v{e}nit obt\'i\v{z}nost i v pr\accent23ub\v{e}hu hry
+	\item[-]mo\v{z}nost kdykoliv zam\v{e}nit po\v{c}\'ita\v{c}ov\'eho a lidsk\'eho hr\'a\v{c}e, nebo \v{c}ern\'eho a b\'il\'eho hr\'a\v{c}e (bez ohledu na to, je-li hr\'a\v{c}em \v{c}lov\v{e}k nebo po\v{c}\'ita\v{c}, zm\v{e}na i v pr\accent23ub\v{e}hu hry)
+	\item[-]n\'apov\v{e}da „nejlep\v{s}\'iho tahu“
+	\item[-]ukl\'ad\'an\'i a na\v{c}\'it\'an\'i (ukon\v{c}en\'ych, rozehran\'ych) parti\'i
+	\item[-]undo/redo tah\accent23u do libovoln\'e \'urovn\v{e}
+	\item[-]prohl\'i\v{z}en\'i historie tah\accent23u (p\v{r}ehledn\'e zobrazen\'i proveden\'ych tah\accent23u)
+	\item[-]zp\v{e}tn\'e p\v{r}ehr\'an\'i partie po jej\'im dokon\v{c}en\'i (replay) s mo\v{z}nost\'i zastaven\'i p\v{r}ehr\'av\'an\'i, pohybu v historii stav\accent23u hry a op\v{e}tovn\'eho rozb\v{e}hnut\'i hry ze zvolen\'eho stavu. P\v{r}i zastaven\'i p\v{r}ehr\'av\'an\'i mo\v{z}nost za\v{c}\'it novou hru nebo otev\v{r}\'it ulo\v{z}enou hru.
+	\item[-]robustnost (program mus\'i reagovat spr\'avn\v{e} na nespr\'avn\'e u\v{z}ivatelsk\'e vstupy, zejm\'ena ovl\'ad\'an\'i, vadn\'y form\'at souboru apod., aplikace nesm\'i havarovat)
+	\item[-]vestav\v{e}n\'a n\'apov\v{e}da
+	\item[-]grafick\'e u\v{z}ivatelsk\'e rozhran\'i (GUI) se zpracovan\'e podle standard\accent23u
+	\item[-]program ve spustiteln\'e form\v{e}, je-li to pro zprovozn\v{e}n\'i aplikace nutn\'e pak tak\'e instal\'ator
+	\item[-]kompletn\'i zdrojov\'e k\'ody programu v\v{c}etn\v{e} dal\v{s}\'ich \v{c}\'ast\'i nutn\'ych pro sestaven\'i aplikace
+	\item[-]program\'atorsk\'a dokumentace k projektu vytvo\v{r}en\'a pomoc\'i z\'avazn\'eho stylu (PDF verze a zdrojov\'a verze). Obsahuje zejm\'ena popis struktury k\'odu, algoritmy hry v\v{c}etn\v{e} hern\'i strategie, postup pro sestaven\'i aplikace. Dokumentace nemus\'i obsahovat u\v{z}ivatelskou p\v{r}\'iru\v{c}ku.
+\end{enumerate}
+
+
+
+\section{Architektura aplikace}
+
+Aplikace je \v{c}len\v{e}na do dvou nez\'avisl\'ych celk\accent23u – j\'adra a u\v{z}ivatelsk\'eho rozhran\'i. J\'adro obsahuje ve\v{s}kerou aplika\v{c}n\'i logiku, tak\v{z}e je samo o sob\v{e} po algoritmick\'e str\'ance pln\v{e} funk\v{c}n\'i implementac\'i hry. Grafick\'e rozhran\'i p\v{r}edstavuje zobrazovac\'i logiku aplikace a zaji\v{s}\v{t}uje komunikaci s u\v{z}ivatelem.\medskip
+
+Na stran\v{e} j\'adra aplikace zaji\v{s}\v{t}uje komunikaci s okoln\'im sv\v{e}tem (v tomto p\v{r}\'ipad\v{e} s u\v{z}ivatelsk\'ym rozhran\'im) t\v{r}\'ida Manager, na stran\v{e} u\v{z}ivatelsk\'eho rozhran\'i komunikaci s j\'adrem realizuje t\v{r}\'ida UIAdapter.\medskip
+
+J\'adro je na u\v{z}ivatelsk\'em rozhran\'i zcela nez\'avisl\'e a rozhran\'i tak m\accent23u\v{z}e b\'yt libovoln\v{e} zm\v{e}n\v{e}no ani\v{z} by se zm\v{e}na n\v{e}jak projevila v j\'ad\v{r}e, sta\v{c}\'i na t\v{r}\'idu UIAdapter nav\'azat jinou implementaci u\v{z}ivatelsk\'eho rozhran\'i se kterou bude komunikovat. Tot\'e\v{z} samoz\v{r}ejm\v{e} plat\'i i pro j\'adro aplikace.\medskip
+
+Aplikace b\v{e}\v{z}\'i standardn\v{e} ve dvou vl\'aknech – jedno vl\'akno se star\'a o GUI, ve druh\'em b\v{e}\v{z}\'i samotn\'a hra. To umo\v{z}\v{n}uje zachovat rychlou reakci GUI i p\v{r}i n\'aro\v{c}n\'ych v\'ypo\v{c}tech prov\'ad\v{e}n\'ych po\v{c}\'ita\v{c}ov\'ym hr\'a\v{c}em a umo\v{z}\v{n}uje lep\v{s}\'i odd\v{e}len\'i j\'adra od GUI. Pro p\v{r}ehr\'av\'an\'i historie hry (funkce replay) je kr\'atkodob\v{e} pou\v{z}ito je\v{s}t\v{e} t\v{r}et\'i vl\'akno.
+\medskip
+
+
+
+
+
+
+
+\section{J\'adro aplikace}
+T\v{r}\'idy tvo\v{r}\'ic\'i j\'adro aplikace a jejich hlavn\'i metody. Metody trivi\'aln\'i, kter\'e pouze deleguj\'i funk\v{c}nost do p\v{r}\'islu\v{s}n\'ych jin\'ych t\v{r}\'id, a metody pomocn\'e s minoritn\'im v\'yznamem pro hlavn\'i architekturu aplikace vynech\'av\'am – lze dohledat ve zdrojov\'em k\'odu a nevy\v{z}aduj\'i explicitn\'i vysv\v{e}tlov\'an\'i.
+
+
+\subsection{T\v{r}\'ida Manager}
+T\v{r}\'ida Manager je hlavn\'i t\v{r}\'idou j\'adra a zaji\v{s}\v{t}uje funk\v{c}nost aplikace – reprezentuje samotnou hru a \v{r}\'id\'i pr\'aci ostatn\'ich t\v{r}\'id j\'adra. Manager realizuje hru, implementuje rozhran\'i pro komunikaci s vn\v{e}j\v{s}\'im sv\v{e}tem, jsou v n\v{e}m definov\'any v\v{s}echny v aplikaci pou\v{z}\'ivan\'e konstanty a synchronizuj\'i se p\v{r}es n\v{e}j jednotliv\'a vl\'akna.
+
+\subsubsection{Metoda Run}
+Nejd\accent23ule\v{z}it\v{e}j\v{s}\'i metoda t\v{r}\'idy Manager, kter\'a realizuje samotnou hru. Hra je realizov\'ana cyklem, ve kter\'em se nejd\v{r}\'ive zjist\'i kter\'y hr\'a\v{c} (\v{c}ern\'y nebo b\'il\'y) je na tahu, od t\v{r}\'idy Arbiter se zjist\'i jak\'e tahy m\accent23u\v{z}e hr\'a\v{c} prov\'est, kolekce takto z\'iskan\'ych povolen\'ych tah\accent23u se p\v{r}ed\'a p\v{r}\'islu\v{s}n\'emu hr\'a\v{c}i, kter\'y vr\'at\'i index tahu je\v{z} si vybral a tento tah se provede.\medskip
+
+Cyklus je mo\v{z}n\'e do\v{c}asn\v{e} pozastavit nastaven\'im synchroniza\v{c}n\'i konstanty STOP\_MAIN na hodnotu true, co\v{z} zp\accent23usob\'i usp\'an\'i cyklu a\v{z} do doby, kdy hodnota konstanty op\v{e}t nenabude hodnoty false. Toho vyu\v{z}\'ivaj\'i nap\v{r}\'iklad funkce manipuluj\'ic\'i s histori\'i hry nebo m\v{e}n\'ic\'i nastaven\'i hr\'a\v{c}\accent23u. Nen\'i-li cyklus zastaven, prob\'ih\'a dokud nen\'i konec hry, pak se zastav\'i s\'am a \v{c}ek\'a dokud mu n\v{e}jak\'a jin\'a metoda znovu nepovol\'i b\v{e}h.\medskip
+
+T\v{r}\'ida Manager implementuje rozhran\'i Runnable (proto se tak\'e tato metoda jmenuje Run), tak\v{z}e tento cyklus a v\v{s}e co je z n\v{e}j vol\'ano b\v{e}\v{z}\'i v samostatn\'em threadu nez\'avisl\'em na u\v{z}ivatelsk\'em rozhran\'i.
+
+\subsubsection{Metoda Replay}
+Realizuje p\v{r}ehr\'an\'i historie tah\accent23u a je spou\v{s}t\v{e}na v samostatn\'em threadu, tzn. nez\'avisle na threadu ve kter\'em b\v{e}\v{z}\'i samotn\'a hra realizovan\'a metodou Run.\medskip
+
+P\v{r}ed zah\'ajen\'im \v{c}innosti samoz\v{r}ejm\v{e} ukon\v{c}\'i vyb\'ir\'an\'i tah\accent23u v t\v{r}\'id\'ach hr\'a\v{c}\accent23u a pozastav\'i b\v{e}h hlavn\'i smy\v{c}ky hry. Pak ji\v{z} zcela trivi\'aln\v{e} p\v{r}eto\v{c}\'i historii tah\accent23u na za\v{c}\'atek a p\v{r}ehr\'av\'a tahy.\medskip
+
+Jej\'i \v{c}innost m\accent23u\v{z}e b\'yt ukon\v{c}ena nastaven\'im konstanty STOP na true, stejn\v{e} jako \v{c}innost hr\'a\v{c}\accent23u p\v{r}i v\'yb\v{e}ru tah\accent23u.
+
+
+
+\subsection{T\v{r}\'ida PlayingArea}
+Tato t\v{r}\'ida reprezentuje stav hry – uchov\'av\'a aktu\'aln\'i stav hrac\'i desky, historii proveden\'ych tah\accent23u a implementuje operace pro manipulaci s nimi.
+
+\subsubsection{Reprezentace hrac\'i desky}
+Deska je reprezentov\'ana dvourozm\v{e}rn\'ym polem \v{c}\'isel, kde je hodnotou konkr\'etn\'iho prvku rozli\v{s}eno, zda na dan\'e pozici je b\'il\'y k\'amen, \v{c}ern\'y k\'amen, voln\'a pozice nebo jde o m\'isto mimo hrac\'i plochu.
+
+\subsubsection{Reprezentace tahu}
+Tah reprezentuje t\v{r}\'irozm\v{e}rn\'e pole \v{c}\'isel. Prvn\'i rozm\v{e}r tvo\v{r}\'i dvourozm\v{e}rn\'a pole reprezentuj\'ic\'i jednotliv\'e z\'akladn\'i instrukce tahu. Libovoln\'y tah lze rozlo\v{z}it na posloupnost t\v{r}\'i typ\accent23u instrukc\'i – odeber k\'amen, p\v{r}idej k\'amen a zm\v{e}\v{n} hr\'a\v{c}e kter\'y je na tahu.\medskip
+
+Instrukce tahu je tvo\v{r}ena dv\v{e}mi dvouprvkov\'ymi poli – v prvn\'im je typ instrukce a barva kamene pro kter\'y se to m\'a prov\'est, v druh\'em pak sou\v{r}adnice x a y na kter\'ych se m\'a operace prov\'est (u instrukce pro zm\v{e}nu hr\'a\v{c}e je pole logicky pr\'azdn\'e).
+
+\subsubsection{Reprezentace historie}
+P\v{r}i takto zaveden\'e reprezentaci tahu je implementace historie z\v{r}ejm\'a – kolekce tah\accent23u v po\v{r}ad\'i v jak\'em byly provedeny a prom\v{e}nn\'a s indexem tahu kter\'y byl proveden naposledy (kv\accent23uli posunu v historii).
+
+\subsubsection{Metoda Move}
+Zahraje p\v{r}edan\'y tah – projde popo\v{r}ad\v{e} jeho jednotliv\'e instrukce a pomoc\'i p\v{r}\'islu\v{s}n\'ych metod (addPiece, deletePiece a setOnMove) je provede.
+
+\subsubsection{Metoda ReverseMove}
+Pracuje stejn\v{e} jako Move, jen u ka\v{z}d\'e instrukce provede instrukci p\v{r}esn\v{e} opa\v{c}nou.
+
+\subsubsection{Metody forward a backward}
+Realizuj\'i p\v{r}esuny v historii tah\accent23u – forvard zahraje dal\v{s}\'i tah v historii n\'asleduj\'ic\'i po posledn\'im zahran\'em tahu, je-li n\v{e}jak\'y, a backward vr\'at\'i posledn\'i zahran\'y tah, je-li n\v{e}jak\'y.
+
+\subsubsection{Metoda clearNextMoves}
+Sma\v{z}e v\v{s}e v historii co n\'asleduje za aktu\'aln\'im tahem – nezbytn\'e v p\v{r}\'ipad\v{e} \v{z}e se u\v{z}ivatel vr\'at\'i o n\v{e}kolik tah\accent23u zp\v{e}t a za\v{c}ne hr\'at od t\'eto pozice.
+
+
+
+\subsection{T\v{r}\'ida Arbiter}
+Reprezentuje ve h\v{r}e rozhod\v{c}\'iho, jeho \'ukolem je zjisti jak\'e tahy m\accent23u\v{z}e hr\'a\v{c} ur\v{c}it\'e barvy prov\'est p\v{r}i konkr\'etn\'im stavu na hrac\'i desce a zji\v{s}\v{t}ovat zda nen\'i konec hry.
+
+\subsubsection{Metoda getValidMoves}
+Realizuje hlavn\'i funk\v{c}nost Arbitera – pro zadanou pozici najde v\v{s}echny pozice kam z n\'i m\accent23u\v{z}e hr\'a\v{c} kter\'y je na tahu p\v{r}esunout sv\accent23uj k\'amen p\v{r}i aktu\'aln\'im stavu na desce.\medskip
+
+Metoda si nejd\v{r}\'ive zjist\'i na jak\'e pozice je mo\v{z}n\'e z po\v{z}adovan\'e pozice j\'it v p\v{r}\'ipad\v{e} \v{z}e je deska pr\'azdn\'a (tj. v\v{s}echny sousedn\'i pozice ke kter\'ym vede \v{c}\'ara z aktu\'aln\'i) – tato informace je ulo\v{z}ena v poli VALID\_MOVES kter\'e obsahuje sousedn\'i pozice pro horn\'i levou \v{c}tvrtinu desky (deska je symetrick\'a, tak\v{z}e pro zbytek desky lze jednodu\v{s}e dopo\v{c}\'itat).\medskip
+
+Takto nalezen\'e pozice projde a je-li pozice voln\'a, p\v{r}id\'a p\v{r}\'islu\v{s}n\'y tah do kolekce povolen\'ych tah\accent23u. Je-li na pozici soupe\v{r}\accent23uv k\'amen a aktu\'aln\'i hled\'an\'i nen\'i hled\'an\'im druh\'eho tahu v bo\v{c}n\'ich troj\'uheln\'ic\'ich desky (viz. dal\v{s}\'i odstavec), ov\v{e}\v{r}\'i zda dal\v{s}\'i pozice v p\v{r}\'im\'em sm\v{e}ru (pat\v{r}\'i-li takov\'a pozice do desky a lze-li na ni j\'it) je voln\'a a pokud ano, p\v{r}id\'a do kolekce povolen\'ych tah\accent23u p\v{r}esko\v{c}en\'i tohoto kamene a zavol\'a pomocnou metodu getJumps (popis viz d\'ale).\medskip
+
+Pokud je po\v{c}\'ate\v{c}n\'i pozice v n\v{e}kter\'em z bo\v{c}n\'ich troj\'uheln\'ik\accent23u, znamen\'a to \v{z}e hr\'a\v{c} m\accent23u\v{z}e t\'ahnout o dv\v{e} pozice. Projdou se v\v{s}echny nalezen\'e tahy a jde-li o tah o jednu pozici, zavol\'a se metoda getValidMoves pro c\'ilovou pozici a do seznamu tah\accent23u se p\v{r}idaj\'i v\v{s}echny tahy z p\accent23uvodn\'i pozice do pozic na kter\'e lze j\'it z koncov\'e pozice aktu\'aln\'iho tahu.
+
+\subsubsection{Metoda getJumps}
+Pomocn\'a metoda metody getValidMoves, kter\'a provede p\v{r}edan\'y tah, zavol\'a metodu getValidMoves pro koncovou pozici proveden\'eho tahu, tah vr\'at\'i zp\v{e}t a nakonec vr\'at\'i kolekci tah\accent23u vznikl\'ych prodlou\v{z}en\'im p\v{r}edan\'eho tahu o v\v{s}echny tahy vr\'acen\'e metodou getValidMoves. Takto jsou nalezeny v\v{s}echny v\'icen\'asobn\'e p\v{r}eskoky kter\'e m\accent23u\v{z}e hr\'a\v{c} potenci\'aln\v{e} prov\'est
+
+\subsubsection{Metoda getAllValidMoves}
+Vr\'at\'i kolekci v\v{s}ech tah\accent23u kter\'e m\accent23u\v{z}e prov\'est hr\'a\v{c} kter\'y je zrovna na tahu. Projde v\v{s}echny pozice na desce a je-li na pozici k\'amen hr\'a\v{c}e kter\'e je na tahu, zavol\'a pro tuto pozici metodu getValidMoves a p\v{r}id\'a do kolekce kterou bude vracet tahy touto metodou vr\'acen\'e.
+
+\subsubsection{Metoda isGameOver}
+Zjist\'i zda je konec hry.
+
+\subsubsection{Metoda getState}
+Vr\'at\'i konstantu reprezentuj\'ic\'i aktu\'aln\'i stav hry – hra prob\'ih\'a, vyhr\'al b\'il\'y, vyhr\'al \v{c}ern\'y nebo rem\'iza.
+
+
+
+\subsection{Hr\'a\v{c}i – interface Player}
+Hr\'a\v{c}e reprezentuje interface Player, kter\'y p\v{r}edepisuje \v{z}e ka\v{z}d\'y hr\'a\v{c} mus\'i m\'it metodu getMove, kter\'a dostane seznam povolen\'ych tah\accent23u a vr\'at\'i index tahu kter\'y hr\'a\v{c} zvolil.
+
+
+\subsection{T\v{r}\'ida HumanPlayer}
+Reprezentuje lidsk\'eho hr\'a\v{c}e a v\'yb\v{e}r tahu zaji\v{s}\v{t}uje u\v{z}ivatelsk\'e rozhran\'i, se kter\'ym t\v{r}\'ida komunikuje p\v{r}es t\v{r}\'idu UIAdapter.
+
+\subsubsection{Metoda getMove}
+Po\v{z}\'ad\'a UIAdapter o tah, p\v{r}i\v{c}em\v{z} mu p\v{r}ed\'a seznam povolen\'ych tah\accent23u, a \v{c}ek\'a dokud tah nen\'i k dispozici.
+
+\subsection{T\v{r}\'ida ComputerPlayer}
+Reprezentuje po\v{c}\'ita\v{c}ov\'eho hr\'a\v{c}e a tah vyb\'ir\'a pomoc\'i algoritmu minimax.
+
+\subsubsection{Metoda getMove}
+Projde v\v{s}echny tahy ze kter\'ych m\accent23u\v{z}e vyb\'irat, ka\v{z}d\'y tah provede a po\v{z}\'ad\'a t\v{r}\'idu MiniMax (viz d\'ale) o hodnocen\'i vznikl\'eho tahu. V p\v{r}\'ipad\v{e} \v{z}e tah je opa\v{c}n\'y k posledn\'imu tahu kter\'y hr\'a\v{c} ud\v{e}lal, sn\'i\v{z}\'i mu hodnocen\'i o polovinu, aby nebyl opakovan\v{e} p\v{r}esouv\'an jeden k\'amen mezi dv\v{e}mi stejn\'ymi pozicemi. Bez takov\'e \'upravy ohodnocen\'i by doch\'azelo k situac\'im, kdy po\v{c}\'ita\v{c}ov\'y hr\'a\v{c} opakovan\v{e} p\v{r}esouv\'a jeden k\'amen mezi dv\v{e}mi pozicemi dokud mu protihr\'a\v{c} ned\'a p\v{r}\'ile\v{z}itost sebrat jeho k\'amen (tzn. p\v{r}i h\v{r}e dvou po\v{c}\'ita\v{c}\accent23u se oba zacykl\'i). Z tah\accent23u se vybere tah s nejlep\v{s}\'im hodnocen\'im.
+
+
+
+\subsection{T\v{r}\'ida MiniMax}
+Realizuje rozhodovac\'i logiku po\v{c}\'ita\v{c}ov\'eho hr\'a\v{c}e pomoc\'i algoritmu minimax.
+
+\subsubsection{Metoda getRate}
+Pro aktu\'aln\'i stav hrac\'i desky zjist\'i jeho v\'yhodnost aplikac\'i algoritmu minimax do po\v{z}adovan\'e hloubky a ohodnocen\'i pomoc\'i p\v{r}edan\'e ohodnocovan\'i funkce Rate.
+
+
+
+\subsection{T\v{r}\'ida Rate}
+Zaji\v{s}\v{t}uje ohodnocen\'i aktu\'aln\'iho stavu hrac\'i desky.
+
+\subsubsection{Metoda getRate}
+Dostane aktu\'aln\'i hrac\'i desku a barvu hr\'a\v{c}e z jeho\v{z} pohledu m\'a stav desky ohodnotit a vr\'at\'i v\'yhodnost stavu pro tohoto hr\'a\v{c}e.\medskip
+
+Z\'akladem hodnocen\'i je pom\v{e}r mezi po\v{c}tem kamen\accent23u hr\'a\v{c}e a jeho soupe\v{r}e – \v{c}\'im v\'ice kamen\accent23u hr\'a\v{c} m\'a a \v{c}\'im m\'en\v{e} jich m\'a jeho soupe\v{r}, t\'im l\'epe. Druh\'ym krit\'eriem, kter\'e m\'a v\v{s}ak men\v{s}\'i v\'ahu ne\v{z} prvn\'i, je celkov\'y po\v{c}et kamen\accent23u na desce – \v{c}\'im m\'en\v{e}, t\'im l\'epe. Kdyby druh\'e krit\'erium nebylo pou\v{z}ito, po\v{c}\'ita\v{c}ov\'y hr\'a\v{c} by neochotn\v{e} d\v{e}lal „v\'ym\v{e}ny“ – pokud sebere soupe\v{r}\accent23uv k\'amen a ten ho n\'asledn\v{e} sebere jemu, pom\v{e}r mezi po\v{c}tem kamen\accent23u hr\'a\v{c}e a soupe\v{r}e se nezm\v{e}n\'i, tud\'i\v{z} v\v{s}echny tahy budou rovnocenn\'e. V praxi je v\v{s}ak lep\v{s}\'i, obzvl\'a\v{s}t\v{e} na za\v{c}\'atku, v\'ym\v{e}nu ud\v{e}lat a pro\v{c}istit plochu. Jinak by hran\'i proti takov\'emu hr\'a\v{c}i asi \v{z}\'adn\'eho u\v{z}ivatele nenadchlo, nebo\v{t} po\v{c}\'ita\v{c} by jeho kameny nep\v{r}eskakoval a jen by si br\'anil svoje, tzn. neud\v{e}lal-li by protihr\'a\v{c} chybu, takto m\'irumilovn\v{e} by se pokra\v{c}ovalo do nekone\v{c}na.\medskip
+
+Posledn\'im krit\'eriem, tentokr\'ate s nejmen\v{s}\'i vahou, je pr\accent23um\v{e}rn\'a vzd\'alenost kamen\accent23u hr\'a\v{c}e od kamen\accent23u protihr\'a\v{c}e. \v{c}\'im bl\'i\v{z}e jsou, t\'im l\'epe. To zaji\v{s}\v{t}uje, \v{z}e se po\v{c}\'ita\v{c}ov\'y hr\'a\v{c} bude p\v{r}ibli\v{z}ovat soupe\v{r}i a \'uto\v{c}it na n\v{e}j, jinak by byl po\v{r}\'ad na sv\'e stran\v{e} a nep\v{r}ibli\v{z}oval by se. Krom toho by mu p\v{r}\'ili\v{s} dlouho trvala koncovka, ve kter\'e je t\v{r}eba „pron\'asledovat“ posledn\'i protihr\'a\v{c}ovy kameny.\medskip
+
+V\'ysledn\'a strategie je pak pou\v{z}iteln\'a pro v\v{s}echny f\'aze hry – za\v{c}\'atek, pr\accent23ub\v{e}h i konec a jin\'ych ohodnocovac\'ich funkc\'i nen\'i zapot\v{r}eb\'i.
+
+
+
+\subsection{T\v{r}\'ida Export}
+Zaji\v{s}\v{t}uje ulo\v{z}en\'i stavu hry do souboru ve form\'atu XML.
+
+\subsubsection{Metoda Save}
+Ulo\v{z}\'i historie tah\accent23u a nastaven\'i hr\'a\v{c}\accent23u do specifikovan\'eho souboru.
+
+\subsubsection{Metoda Load}
+Na\v{c}te ze souboru historii tah\accent23u a nastaven\'i hr\'a\v{c}\accent23u, ov\v{e}\v{r}\'i platnost soboru pomoc\'i kontroln\'iho hashe a je-li platn\'y vynuluje hrac\'i desku, provede na n\'i v\v{s}echny na\v{c}ten\'e tahy, n\'asledn\v{e} vr\'at\'i tolik tah\accent23u kolik m\'a b\'yt vr\'aceno (pozice v historii tah\accent23u je ur\v{c}ena parametrem u posledn\'iho zahran\'eho a nevr\'acen\'eho  tahu) a nastav\'i hr\'a\v{c}e podle \'udaj\accent23u v souboru.
+
+
+
+
+
+
+
+
+\section{U\v{z}ivatelsk\'e rozhran\'i}
+Popis \v{c}\'asti s u\v{z}ivatelsk\'ym rozhran\'im bude sp\'i\v{s}e stru\v{c}n\v{e}j\v{s}\'i, neb na n\v{e}m nen\'i nic moc zaj\'imav\'eho – v\v{e}t\v{s}inu tvo\v{r}\'i k\'od grafiky naklikan\'e ve v\'yvojov\'em prost\v{r}ed\'i.
+
+
+
+\subsection{T\v{r}\'ida UIAdapter}
+Zaji\v{s}\v{t}uje komunikaci mezi j\'adrem a u\v{z}ivatelsk\'ym rozhran\'im. Implementuje metody kter\'e jsou k tomu pot\v{r}eba a sama defacto nic zaj\'imav\'eho ned\v{e}l\'a, jen p\v{r}epos\'il\'a po\v{z}adavky a deleguje svoji funk\v{c}nost jinam.
+
+
+
+\subsection{T\v{r}\'ida Gui}
+Obsahuje samotnou grafiku a obslu\v{z}n\'e metody staraj\'ic\'i se o obsluhu ud\'alost\'i a komunikaci s u\v{z}ivatelem. Grafika je implementov\'ana v z\'akladn\'i grafick\'e knihovn\v{e} Javy – knihovn\v{e} Swing.\medskip
+
+V\v{e}t\v{s}ina metod jsou vcelku trivi\'aln\'i ovlada\v{c}e ud\'alost\'i, kter\'e jen volaj\'i t\v{r}\'idu UIAdapter a m\v{e}n\'i grafick\'e rozhran\'i, tud\'i\v{z} nem\'a cenu je zde popisovat. Za zm\'inku stoj\'i pouze ve\v{r}ejn\'e metody kter\'e vol\'a UIAdapter a ovlada\v{c} kliknut\'i na hrac\'i plochu (areaClick), kter\'a\v{z}to metoda je na rozd\'il od ostatn\'ich slo\v{z}it\v{e}j\v{s}\'i a koment\'a\v{r} si zasluhuje.
+
+\subsubsection{Metoda wantMove}
+Metodu zavol\'a t\v{r}\'ida lidsk\'y hr\'a\v{c} kdy\v{z} chce po\v{z}\'adat u\v{z}ivatele o vybr\'an\'i tahu kter\'y chce zahr\'at. Parametrem je kolekce povolen\'ych tah\accent23u ze kter\'ych lze vyb\'irat. Metoda nastav\'i intern\'i prom\v{e}nn\'e t\v{r}\'idy tak, aby ovlada\v{c} kliknut\'i na plochu umo\v{z}\v{n}oval vybrat tah.
+
+\subsubsection{Metoda dontWantMove}
+Zavol\'a ji lidsk\'y hr\'a\v{c} v okam\v{z}iku kdy chce d\'at najevo \v{z}e v\'yb\v{e}r tahu je ukon\v{c}en – bu\v{d} kdy\v{z} si p\v{r}e\v{c}etl \v{c}\'islo tahu kter\'y u\v{z}ivatel vybral, nebo kdy\v{z} byl jeho b\v{e}h p\v{r}eru\v{s}en. Metoda vynuluje doposud vybran\'y tah a prom\v{e}nn\'e s v\'yb\v{e}rem tahu souvisej\'ic\'i a nastav\'i intern\'i prom\v{e}nn\'e tak, aby ne\v{s}lo vyb\'irat tahy.
+
+\subsubsection{Metoda getMove}
+Metodu vol\'a lidsk\'y hr\'a\v{c} kdy\v{z} se chce pod\'ivat, jestli u\v{z}ivatel ji\v{z} vybral n\v{e}jak\'y tah, nebo ne. Pokud u\v{z}ivatel ukon\v{c}il v\'yb\v{e}r tahu vrac\'i \v{c}\'islo vybran\'eho tahu, nebo -1 v p\v{r}\'ipad\v{e} opa\v{c}n\'em.
+
+\subsubsection{Metoda endOfGame}
+Signalizuje u\v{z}ivateli \v{z}e je konec hry.
+
+\subsubsection{Metoda paintArea}
+Zobraz\'i plochu p\v{r}edanou jako pole integer\accent23u m\'isto plochy aktu\'aln\v{e} zobrazen\'e (updatuje stav plochy).
+
+\subsubsection{Metoda paintMoveHistory}
+Zobraz\'i u\v{z}ivateli historii tah\accent23u p\v{r}edanou jako kolekce tah\accent23u v chronologick\'em po\v{r}ad\'i. Aktu\'aln\v{e} zobrazenou historii sma\v{z}e a nahrad\'i histori\'i p\v{r}edanou.
+
+\subsubsection{Metoda areaClick}
+Ovlada\v{c} ud\'alosti kliknut\'i na hrac\'i plochu. Je-li hra pozastavena, spust\'i ji a pokud nen\'i nastaveno \v{z}e u\v{z}ivatel m\accent23u\v{z}e vyb\'irat tahy (zavol\'an\'im metody wantMove), nic dal\v{s}\'iho neud\v{e}l\'a. N\'asledn\v{e} ov\v{e}\v{r}\'i zda u\v{z}ivatel klikl na n\v{e}jak\'y k\'amen a zda je jeho barva shodn\'a s barvou hr\'a\v{c}e kter\'y je na tahu a pro kter\'eho se m\'a vybrat tah.\medskip
+
+Pokud u\v{z}ivatel provedl dvojklik na koncovou pozici vybran\'eho tahu (p\v{r}\'ipadn\v{e} pozici jej\'im\v{z} vybr\'an\'im bude doposud vybran\'y tah ukon\v{c}en), tento tah se provede (tah se ozna\v{c}\'i jako ukon\v{c}en\'y a po\v{s}le se sign\'al t\v{r}\'id\v{e} hr\'a\v{c}e).\medskip
+
+Klikl-li jen jednou na pozici kter\'a je sou\v{c}\'ast\'i vybran\'e posloupnosti pozic (a\v{t} ji\v{z} tvo\v{r}\'i kompletn\'i tah nebo jen jeho \v{c}\'ast), tato pozice se odzna\v{c}\'i stejn\v{e} tak jako v\v{s}echny pozice v posloupnosti n\'asleduj\'ic\'i (ozna\v{c}en\'e po aktu\'aln\'i).\medskip
+
+Jinak se projdou v\v{s}echny povolen\'e tahy a pokud ji\v{z} vybr\'ana posloupnost pozic spolu s pozic\'i na kterou se kliklo tvo\v{r}\'i za\v{c}\'atek posloupnosti tvo\v{r}\'ic\'i n\v{e}kter\'y z povolen\'ych tah\accent23u, pozice se ozna\v{c}\'i a odpov\'idaj\'ic\'i tah se vybere. Pokud je vybr\'ana posloupnost a pozice na kterou se kliklo je pozic\'i na n\'i\v{z} lze j\'it kamenem kter\'ym chce hr\'a\v{c} hr\'at (tzn. je to za\v{c}\'atek jin\'eho tahu stejn\'ym kamenem), p\accent23uvodn\'i posloupnost se sma\v{z}e a nahrad\'i se tahem na tuto pozici. A kone\v{c}n\v{e} pokud hr\'a\v{c} klikne na jin\'y k\'amen kter\'ym m\accent23u\v{z}e hr\'at, vybran\'a posloupnost se zru\v{s}\'i a ozna\v{c}\'i se k\'amen na kter\'y se kliklo. To sam\'e se stane pokud nen\'i \v{z}\'adn\'y k\'amen vybr\'an.
+
+
+
+
+\subsection{T\v{r}\'ida GraphicArea}
+Grafick\'a komponenta reprezentuj\'ic\'i hrac\'i desku. Na pozad\'i zobrazuje obr\'azek hrac\'i desky a obsahuje pole pozic na desce reprezentovan\'ych instancemi t\v{r}\'idy Piece, jeho\v{z} struktura je obdobou struktury pole reprezentuj\'ic\'iho hrac\'i desku ve t\v{r}\'id\v{e} PlayingArea.\medskip
+
+T\v{r}\'ida se um\'i nakreslit, nastavit barvu n\v{e}kter\'e z pozic na desce, zjistit zda ur\v{c}it\'a pozice obsahuje bod s konkr\'etn\'imi sou\v{r}adnicemi a upravit barvu bod\accent23u tak, aby stav odpov\'idal konkr\'etn\'imu stavu hrac\'i desky.
+
+
+
+\subsection{T\v{r}\'ida Piece}
+Grafick\'a komponenta reprezentuj\'ic\'i pozici na hrac\'i plo\v{s}e. M\'a barvu odpov\'idaj\'ic\'i stav\accent23um pozice (pr\'azdn\'a, obsazen\'a b\'il\'ym kamenem, obsazen\'a \v{c}ern\'ym kamenem a ozna\v{c}en\'a) kterou lze nastavit a z\'iskat, um\'i se nakreslit v podob\v{e} kole\v{c}ka s vzhledem odpov\'idaj\'ic\'im ur\v{c}it\'emu stavu a um\'i \v{r}\'ict zda ur\v{c}it\'y bod je uvnit\v{r} n\'i.
+
+
+
+
+
+
+
+
+
+
+
+
+\end{document}
